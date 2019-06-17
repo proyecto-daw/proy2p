@@ -11,3 +11,18 @@ class WaypointAdmin(admin.ModelAdmin):
 @admin.register(Area)
 class AreaAdmin(admin.ModelAdmin):
     pass
+
+
+@admin.register(User)
+class UserAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(Subject)
+class SubjectAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(Course)
+class CourseAdmin(admin.ModelAdmin):
+    pass
