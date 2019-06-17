@@ -8,6 +8,9 @@ class Waypoint(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
 
+    def __str__(self):
+        return f"WP {self.name}"
+
 
 class Area(models.Model):
     latitude = models.FloatField()
@@ -15,9 +18,15 @@ class Area(models.Model):
     radius = models.FloatField()
     name = models.CharField(max_length=100)
 
+    def __str__(self):
+        return f"Area {self.name}"
+
 
 class Subject(models.Model):
     name = models.TextField(max_length=100)
+
+    def __str__(self):
+        return self.name
 
 
 class Course(models.Model):
@@ -26,6 +35,9 @@ class Course(models.Model):
 
     def to_dict(self):
         return {"NOMBRE": self.subject.name, "PARALELO": self.number}
+
+    def __str__(self):
+        return f"{self.subject.name}#{self.number}"
 
 
 class Session(models.Model):
@@ -42,6 +54,9 @@ class Session(models.Model):
                 "BLOQUE": self.closest_waypoint.id,
                 "HORA": f"{self.start_time.hour}:{self.start_time.minute}"
                 }
+
+    def __str__(self):
+        return f"Session of {self.course} on day #{self.day} at {self.start_time}"
 
 
 class User(models.Model):
@@ -61,6 +76,9 @@ class User(models.Model):
             response_dict["ADMIN"] = "true"
         return response_dict
 
+    def __str__(self):
+        return self.email
+
 
 class Event(models.Model):
     name = models.CharField(max_length=100)
@@ -70,3 +88,6 @@ class Event(models.Model):
 
     def to_dict(self):
         return [self.name, self.place, self.closest_waypoint.id, str(self.start_datetime)]
+
+    def __str__(self):
+        return f"Event {self.name} at {self.place}"
