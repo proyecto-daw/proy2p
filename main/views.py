@@ -34,3 +34,14 @@ def events(request):
                                                                   start_datetime__lt=datetime.now() + timedelta(
                                                                       days=7))}
                          })
+
+
+@csrf_exempt
+def signup(request):
+    user = User(username=request.POST["USERNAME"],
+                name=request.POST["NAMES"] + " " + request.POST["LASTNAMES"],
+                email=request.POST["EMAIL"],
+                password=request.POST["PASSWORD"],
+                career=request.POST["CAREER"])
+    user.save()
+    return JsonResponse({"members": [user.to_dict()]})

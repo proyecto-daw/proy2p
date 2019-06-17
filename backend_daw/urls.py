@@ -23,4 +23,5 @@ urlpatterns = [
     path('areas', views.areas, name="areas"),
     path("waypoints", views.waypoints, name="waypoints"),
     path('events', views.events, name="events"),
+    path('signup', views.signup, name="signup"),
 ]
