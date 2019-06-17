@@ -2,6 +2,20 @@ from django.db import models
 
 
 # Create your models here.
+class Waypoint(models.Model):
+    latitude = models.FloatField()
+    longitude = models.FloatField()
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+
+
+class Area(models.Model):
+    latitude = models.FloatField()
+    longitude = models.FloatField()
+    radius = models.FloatField()
+    name = models.CharField(max_length=100)
+
+
 class Subject(models.Model):
     name = models.TextField(max_length=100)
 
@@ -12,6 +26,22 @@ class Course(models.Model):
 
     def to_dict(self):
         return {"NOMBRE": self.subject.name, "PARALELO": self.number}
+
+
+class Session(models.Model):
+    classroom = models.CharField(max_length=100)
+    closest_waypoint = models.ForeignKey(Waypoint, on_delete=models.PROTECT)
+    day = models.PositiveIntegerField()
+    start_time = models.TimeField()
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+
+    def to_dict(self):
+        return {"NOMBRE": self.course.subject.name,
+                "PARALELO": self.course.number,
+                "AULA": self.classroom,
+                "BLOQUE": self.closest_waypoint.id,
+                "HORA": f"{self.start_time.hour}:{self.start_time.minute}"
+                }
 
 
 class User(models.Model):
@@ -30,20 +60,6 @@ class User(models.Model):
         if self.is_admin:
             response_dict["ADMIN"] = "true"
         return response_dict
-
-
-class Waypoint(models.Model):
-    latitude = models.FloatField()
-    longitude = models.FloatField()
-    name = models.CharField(max_length=100)
-    description = models.TextField(blank=True)
-
-
-class Area(models.Model):
-    latitude = models.FloatField()
-    longitude = models.FloatField()
-    radius = models.FloatField()
-    name = models.CharField(max_length=100)
 
 
 class Event(models.Model):

@@ -45,3 +45,15 @@ def signup(request):
                 career=request.POST["CAREER"])
     user.save()
     return JsonResponse({"members": [user.to_dict()]})
+
+
+@csrf_exempt
+def my_classes(request):
+    user = User.objects.filter(email=request.POST["username"], password=request.POST["password"])
+    if len(user) == 1:
+        user = user[0]
+        today_index = datetime.today().isoweekday()  # Monday is 1 and Sunday is 7
+        return JsonResponse(
+            {"classes": [s.to_dict() for c in user.courses.all() for s in c.session_set.all() if s.day == today_index]})
+    else:
+        return JsonResponse({"classes": []})
