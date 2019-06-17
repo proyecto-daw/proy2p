@@ -10,9 +10,9 @@ def login(request):
     user = User.objects.filter(email=request.POST["username"], password=request.POST["password"])
     if len(user) == 1:
         user = user[0]
-        return JsonResponse(user.to_dict())
+        return JsonResponse({"members": [user.to_dict()]})
     else:
-        return JsonResponse({})
+        return JsonResponse({"members": []})
 
 
 @csrf_exempt
