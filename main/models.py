@@ -44,3 +44,13 @@ class Area(models.Model):
     longitude = models.FloatField()
     radius = models.FloatField()
     name = models.CharField(max_length=100)
+
+
+class Event(models.Model):
+    name = models.CharField(max_length=100)
+    place = models.CharField(max_length=200)
+    closest_waypoint = models.ForeignKey(Waypoint, related_name="events_closest", on_delete=models.CASCADE)
+    start_datetime = models.DateTimeField()
+
+    def to_dict(self):
+        return [self.name, self.place, self.closest_waypoint.id, str(self.start_datetime)]

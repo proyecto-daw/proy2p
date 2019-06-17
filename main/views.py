@@ -1,6 +1,8 @@
+from datetime import datetime, timedelta
+
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
-from .models import User, Waypoint, Area
+from .models import User, Waypoint, Area, Event
 from django.views.decorators.csrf import csrf_exempt
 
 
@@ -23,3 +25,12 @@ def waypoints(request):
 @csrf_exempt
 def areas(request):
     return JsonResponse({"areas": {a.id: [a.latitude, a.longitude, a.name] for a in Area.objects.all()}})
+
+
+@csrf_exempt
+def events(request):
+    return JsonResponse({"events": {e.id: e.to_dict()
+                                    for e in Event.objects.filter(start_datetime__gt=datetime.now(),
+                                                                  start_datetime__lt=datetime.now() + timedelta(
+                                                                      days=7))}
+                         })
