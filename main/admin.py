@@ -31,3 +31,7 @@ class CourseAdmin(admin.ModelAdmin):
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
     pass
+
+@admin.register(Session)
+class SessionAdmin(admin.ModelAdmin):
+    pass
