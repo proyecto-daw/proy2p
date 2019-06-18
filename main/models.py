@@ -66,7 +66,8 @@ class User(models.Model):
     password = models.CharField(max_length=200)
     is_admin = models.BooleanField(default=False)
     career = models.CharField(max_length=100)
-    courses = models.ManyToManyField(Course, null=True, blank=True)
+    courses = models.ManyToManyField(Course, blank=True)
+    friends = models.ManyToManyField('self')
 
     def to_dict(self):
         response_dict = {"NAMES": self.name, "LASTNAMES": "", "USERNAME": self.username, "EMAIL": self.email,
@@ -75,6 +76,9 @@ class User(models.Model):
         if self.is_admin:
             response_dict["ADMIN"] = "true"
         return response_dict
+
+    def to_friend_dict(self):
+        return {"NAMES": self.name, "LASTNAMES": "", "CAREER": self.career}
 
     def __str__(self):
         return self.email

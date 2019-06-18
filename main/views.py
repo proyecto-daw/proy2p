@@ -57,3 +57,14 @@ def my_classes(request):
             {"classes": [s.to_dict() for c in user.courses.all() for s in c.session_set.all() if s.day == today_index]})
     else:
         return JsonResponse({"classes": []})
+
+
+@csrf_exempt
+def friends_groups(request):
+    user = User.objects.filter(email=request.POST["username"], password=request.POST["password"])
+    if len(user) == 1:
+        user = user[0]
+        return JsonResponse({"friends": [f.to_friend_dict() for f in user.friends.all()],
+                             "groups": []})
+    else:
+        return JsonResponse({"friends": [], "groups": []})
