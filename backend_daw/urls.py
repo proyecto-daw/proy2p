@@ -26,4 +26,8 @@ urlpatterns = [
     path('signup', views.signup, name="signup"),
     path('get_my_classes', views.my_classes, name="my_classes"),
     path('get_friends_groups', views.friends_groups, name="friends_groups"),
+    path('api_admin/new_or_edit_event', views.admin_edit_event, name="admin_edit_event"),
+    path('api_admin/delete_event', views.admin_delete_event, name="admin_delete_event"),
+    path('api_admin/new_or_edit_waypoint', views.admin_edit_waypoint, name="admin_edit_waypoint"),
+    path('api_admin/delete_waypoint', views.admin_delete_waypoint, name="admin_delete_waypoint"),
 ]

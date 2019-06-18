@@ -11,6 +11,9 @@ class Waypoint(models.Model):
     def __str__(self):
         return f"WP {self.name}"
 
+    def to_dict(self):
+        return [self.latitude, self.longitude, self.name]
+
 
 class Area(models.Model):
     latitude = models.FloatField()
