@@ -34,9 +34,7 @@ def areas(request):
 @csrf_exempt
 def events(request):
     return JsonResponse({"events": {e.id: e.to_dict()
-                                    for e in Event.objects.filter(start_datetime__gt=datetime.now(),
-                                                                  start_datetime__lt=datetime.now() + timedelta(
-                                                                      days=7)).order_by("id")}
+                                    for e in Event.objects.filter(start_datetime__gt=datetime.now()).order_by("id")}
                          })
 
 
