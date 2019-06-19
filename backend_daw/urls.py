@@ -30,4 +30,6 @@ urlpatterns = [
     path('api_admin/delete_event', views.admin_delete_event, name="admin_delete_event"),
     path('api_admin/new_or_edit_waypoint', views.admin_edit_waypoint, name="admin_edit_waypoint"),
     path('api_admin/delete_waypoint', views.admin_delete_waypoint, name="admin_delete_waypoint"),
+    path('api_admin/new_or_edit_area', views.admin_edit_area, name="admin_edit_area"),
+    path('api_admin/delete_area', views.admin_delete_area, name="admin_delete_area"),
 ]

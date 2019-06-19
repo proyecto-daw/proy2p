@@ -24,6 +24,9 @@ class Area(models.Model):
     def __str__(self):
         return f"Area {self.name}"
 
+    def to_dict(self):
+        return [self.latitude, self.longitude, self.name]
+
 
 class Subject(models.Model):
     name = models.TextField(max_length=100)

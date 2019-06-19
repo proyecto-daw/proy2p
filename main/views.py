@@ -128,3 +128,32 @@ def admin_delete_waypoint(request):
         return JsonResponse({"result": "OK"})
     else:
         return JsonResponse({})
+
+
+@csrf_exempt
+def admin_edit_area(request):
+    user = User.objects.filter(email=request.POST["username"], password=request.POST["password"])
+    if len(user) == 1 and user[0].is_admin:
+        desired_area = json.loads(request.POST["area"])
+        if list(desired_area.keys())[0] == "-1":  # Create new area
+            area = Area()
+        else:  # Edit existing area
+            area = Area.objects.get(id=list(desired_area.keys())[0])
+        area.name = list(desired_area.values())[0][2]
+        area.latitude = list(desired_area.values())[0][0]
+        area.longitude = list(desired_area.values())[0][1]
+        area.radius = 50
+        area.save()
+        return JsonResponse({"area": {area.id: area.to_dict()}})
+    else:
+        return JsonResponse({})
+
+
+@csrf_exempt
+def admin_delete_area(request):
+    user = User.objects.filter(email=request.POST["username"], password=request.POST["password"])
+    if len(user) == 1 and user[0].is_admin:
+        Area.objects.get(id=request.POST["area_id"]).delete()
+        return JsonResponse({"result": "OK"})
+    else:
+        return JsonResponse({})
