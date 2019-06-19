@@ -34,4 +34,5 @@ urlpatterns = [
     path('api_admin/delete_area', views.admin_delete_area, name="admin_delete_area"),
     path('api_admin/view_users', views.admin_view_users, name="admin_view_users"),
     path('api_admin/block_user', views.admin_block_user, name="admin_block_user"),
+    path('api_admin/adminify_user', views.admin_adminify_user, name="admin_adminify_user"),
 ]

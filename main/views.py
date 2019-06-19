@@ -188,3 +188,14 @@ def admin_block_user(request):
         return JsonResponse({"result": "OK"})
     else:
         return JsonResponse({})
+
+@csrf_exempt
+def admin_adminify_user(request):
+    user = User.objects.filter(email=request.POST["username"], password=request.POST["password"], is_admin=True)
+    if len(user) == 1:
+        target = User.objects.get(email=request.POST["target"])
+        target.is_admin = False if request.POST["action"] == "UNADMIN" else True
+        target.save()
+        return JsonResponse({"result": "OK"})
+    else:
+        return JsonResponse({})
