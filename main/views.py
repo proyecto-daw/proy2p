@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 
+from django.db.models import ProtectedError
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.utils.dateparse import parse_datetime
@@ -96,8 +97,11 @@ def admin_edit_event(request):
 def admin_delete_event(request):
     user = User.objects.filter(email=request.POST["username"], password=request.POST["password"], is_admin=True)
     if len(user) == 1:
-        Event.objects.get(id=request.POST["event_id"]).delete()
-        return JsonResponse({"result": "OK"})
+        try:
+            Event.objects.get(id=request.POST["event_id"]).delete()
+            return JsonResponse({"result": "OK"})
+        except ProtectedError:
+            return JsonResponse({"result": "PROTECTED_ERROR"})
     else:
         return JsonResponse({})
 
@@ -124,7 +128,10 @@ def admin_edit_waypoint(request):
 def admin_delete_waypoint(request):
     user = User.objects.filter(email=request.POST["username"], password=request.POST["password"], is_admin=True)
     if len(user) == 1:
-        Waypoint.objects.get(id=request.POST["waypoint_id"]).delete()
+        try:
+            Waypoint.objects.get(id=request.POST["waypoint_id"]).delete()
+        except ProtectedError:
+            return JsonResponse({"result": "PROTECTED_ERROR"})
         return JsonResponse({"result": "OK"})
     else:
         return JsonResponse({})
@@ -153,7 +160,10 @@ def admin_edit_area(request):
 def admin_delete_area(request):
     user = User.objects.filter(email=request.POST["username"], password=request.POST["password"], is_admin=True)
     if len(user) == 1:
-        Area.objects.get(id=request.POST["area_id"]).delete()
+        try:
+            Area.objects.get(id=request.POST["area_id"]).delete()
+        except ProtectedError:
+            return JsonResponse({"result": "PROTECTED_ERROR"})
         return JsonResponse({"result": "OK"})
     else:
         return JsonResponse({})
