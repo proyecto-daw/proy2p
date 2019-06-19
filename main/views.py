@@ -23,12 +23,12 @@ def login(request):
 
 @csrf_exempt
 def waypoints(request):
-    return JsonResponse({"waypoints": {w.id: [w.latitude, w.longitude, w.name] for w in Waypoint.objects.all()}})
+    return JsonResponse({"waypoints": {w.id: [w.latitude, w.longitude, w.name] for w in Waypoint.objects.all().order_by("id")}})
 
 
 @csrf_exempt
 def areas(request):
-    return JsonResponse({"areas": {a.id: [a.latitude, a.longitude, a.name] for a in Area.objects.all()}})
+    return JsonResponse({"areas": {a.id: [a.latitude, a.longitude, a.name] for a in Area.objects.all().order_by("id")}})
 
 
 @csrf_exempt
@@ -36,7 +36,7 @@ def events(request):
     return JsonResponse({"events": {e.id: e.to_dict()
                                     for e in Event.objects.filter(start_datetime__gt=datetime.now(),
                                                                   start_datetime__lt=datetime.now() + timedelta(
-                                                                      days=7))}
+                                                                      days=7)).order_by("id")}
                          })
 
 
