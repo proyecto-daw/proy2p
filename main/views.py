@@ -12,7 +12,7 @@ import json
 # Create your views here.
 @csrf_exempt
 def login(request):
-    user = User.objects.filter(email=request.POST["username"], password=request.POST["password"])
+    user = User.objects.filter(email=request.POST["username"], password=request.POST["password"], blocked=False)
     if len(user) == 1:
         user = user[0]
         return JsonResponse({"members": [user.to_dict()]})
@@ -52,7 +52,7 @@ def signup(request):
 
 @csrf_exempt
 def my_classes(request):
-    user = User.objects.filter(email=request.POST["username"], password=request.POST["password"])
+    user = User.objects.filter(email=request.POST["username"], password=request.POST["password"], blocked=False)
     if len(user) == 1:
         user = user[0]
         today_index = datetime.today().isoweekday()  # Monday is 1 and Sunday is 7
@@ -64,7 +64,7 @@ def my_classes(request):
 
 @csrf_exempt
 def friends_groups(request):
-    user = User.objects.filter(email=request.POST["username"], password=request.POST["password"])
+    user = User.objects.filter(email=request.POST["username"], password=request.POST["password"], blocked=False)
     if len(user) == 1:
         user = user[0]
         return JsonResponse({"friends": [f.to_friend_dict() for f in user.friends.all()],
@@ -75,8 +75,8 @@ def friends_groups(request):
 
 @csrf_exempt
 def admin_edit_event(request):
-    user = User.objects.filter(email=request.POST["username"], password=request.POST["password"])
-    if len(user) == 1 and user[0].is_admin:
+    user = User.objects.filter(email=request.POST["username"], password=request.POST["password"], is_admin=True)
+    if len(user) == 1:
         desired_event = json.loads(request.POST["event"])
         if list(desired_event.keys())[0] == "-1":  # Create new event
             event = Event()
@@ -94,8 +94,8 @@ def admin_edit_event(request):
 
 @csrf_exempt
 def admin_delete_event(request):
-    user = User.objects.filter(email=request.POST["username"], password=request.POST["password"])
-    if len(user) == 1 and user[0].is_admin:
+    user = User.objects.filter(email=request.POST["username"], password=request.POST["password"], is_admin=True)
+    if len(user) == 1:
         Event.objects.get(id=request.POST["event_id"]).delete()
         return JsonResponse({"result": "OK"})
     else:
@@ -104,8 +104,8 @@ def admin_delete_event(request):
 
 @csrf_exempt
 def admin_edit_waypoint(request):
-    user = User.objects.filter(email=request.POST["username"], password=request.POST["password"])
-    if len(user) == 1 and user[0].is_admin:
+    user = User.objects.filter(email=request.POST["username"], password=request.POST["password"], is_admin=True)
+    if len(user) == 1:
         desired_waypoint = json.loads(request.POST["waypoint"])
         if list(desired_waypoint.keys())[0] == "-1":  # Create new waypoint
             waypoint = Waypoint()
@@ -122,8 +122,8 @@ def admin_edit_waypoint(request):
 
 @csrf_exempt
 def admin_delete_waypoint(request):
-    user = User.objects.filter(email=request.POST["username"], password=request.POST["password"])
-    if len(user) == 1 and user[0].is_admin:
+    user = User.objects.filter(email=request.POST["username"], password=request.POST["password"], is_admin=True)
+    if len(user) == 1:
         Waypoint.objects.get(id=request.POST["waypoint_id"]).delete()
         return JsonResponse({"result": "OK"})
     else:
@@ -132,8 +132,8 @@ def admin_delete_waypoint(request):
 
 @csrf_exempt
 def admin_edit_area(request):
-    user = User.objects.filter(email=request.POST["username"], password=request.POST["password"])
-    if len(user) == 1 and user[0].is_admin:
+    user = User.objects.filter(email=request.POST["username"], password=request.POST["password"], is_admin=True)
+    if len(user) == 1:
         desired_area = json.loads(request.POST["area"])
         if list(desired_area.keys())[0] == "-1":  # Create new area
             area = Area()
@@ -151,9 +151,30 @@ def admin_edit_area(request):
 
 @csrf_exempt
 def admin_delete_area(request):
-    user = User.objects.filter(email=request.POST["username"], password=request.POST["password"])
-    if len(user) == 1 and user[0].is_admin:
+    user = User.objects.filter(email=request.POST["username"], password=request.POST["password"], is_admin=True)
+    if len(user) == 1:
         Area.objects.get(id=request.POST["area_id"]).delete()
+        return JsonResponse({"result": "OK"})
+    else:
+        return JsonResponse({})
+
+
+@csrf_exempt
+def admin_view_users(request):
+    user = User.objects.filter(email=request.POST["username"], password=request.POST["password"], is_admin=True)
+    if len(user) == 1:
+        return JsonResponse({"users": [u.to_dict() for u in User.objects.all()]})
+    else:
+        return JsonResponse({})
+
+
+@csrf_exempt
+def admin_block_user(request):
+    user = User.objects.filter(email=request.POST["username"], password=request.POST["password"], is_admin=True)
+    if len(user) == 1:
+        target = User.objects.get(email=request.POST["target"])
+        target.blocked = False if request.POST["action"] == "UNLOCK" else True
+        target.save()
         return JsonResponse({"result": "OK"})
     else:
         return JsonResponse({})

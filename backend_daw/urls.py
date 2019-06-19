@@ -32,4 +32,6 @@ urlpatterns = [
     path('api_admin/delete_waypoint', views.admin_delete_waypoint, name="admin_delete_waypoint"),
     path('api_admin/new_or_edit_area', views.admin_edit_area, name="admin_edit_area"),
     path('api_admin/delete_area', views.admin_delete_area, name="admin_delete_area"),
+    path('api_admin/view_users', views.admin_view_users, name="admin_view_users"),
+    path('api_admin/block_user', views.admin_block_user, name="admin_block_user"),
 ]

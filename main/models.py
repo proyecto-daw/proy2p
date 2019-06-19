@@ -74,6 +74,7 @@ class User(models.Model):
     career = models.CharField(max_length=100)
     courses = models.ManyToManyField(Course, blank=True)
     friends = models.ManyToManyField('self')
+    blocked = models.BooleanField(default=False)
 
     def to_dict(self):
         response_dict = {"NAMES": self.name, "LASTNAMES": "", "USERNAME": self.username, "EMAIL": self.email,
@@ -85,6 +86,10 @@ class User(models.Model):
 
     def to_friend_dict(self):
         return {"NAMES": self.name, "LASTNAMES": "", "CAREER": self.career}
+
+    def to_admin_dict(self):
+        return {"NAMES": self.name, "LASTNAMES": "", "USERNAME": self.username, "EMAIL": self.email,
+                "CAREER": self.career, "BLOCKED": self.blocked}
 
     def __str__(self):
         return self.email
