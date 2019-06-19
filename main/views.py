@@ -163,7 +163,7 @@ def admin_delete_area(request):
 def admin_view_users(request):
     user = User.objects.filter(email=request.POST["username"], password=request.POST["password"], is_admin=True)
     if len(user) == 1:
-        return JsonResponse({"users": [u.to_dict() for u in User.objects.all()]})
+        return JsonResponse({"users": [u.to_admin_dict() for u in User.objects.all()]})
     else:
         return JsonResponse({})
 
