@@ -89,7 +89,7 @@ class User(models.Model):
 
     def to_admin_dict(self):
         return {"NAMES": self.name, "LASTNAMES": "", "USERNAME": self.username, "EMAIL": self.email,
-                "CAREER": self.career, "BLOCKED": self.blocked}
+                "CAREER": self.career, "BLOCKED": self.blocked, "ADMIN": self.is_admin, "ID": self.id}
 
     def __str__(self):
         return self.email
