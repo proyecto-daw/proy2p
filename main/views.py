@@ -3,9 +3,10 @@ from datetime import datetime, timedelta
 from django.db.models import ProtectedError
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
+from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 
-from .models import User, Waypoint, Area, Event
+from .models import User, Waypoint, Area, Event, TrackingRequest
 from django.views.decorators.csrf import csrf_exempt
 import json
 
@@ -34,7 +35,7 @@ def areas(request):
 @csrf_exempt
 def events(request):
     return JsonResponse({"events": {e.id: e.to_dict()
-                                    for e in Event.objects.filter(start_datetime__gt=datetime.now()).order_by("id")}
+                                    for e in Event.objects.filter(start_datetime__gt=timezone.now()).order_by("id")}
                          })
 
 
@@ -70,6 +71,64 @@ def friends_groups(request):
                              "groups": []})
     else:
         return JsonResponse({"friends": [], "groups": []})
+
+
+@csrf_exempt
+def poll(request):
+    user = User.objects.filter(email=request.POST["username"], password=request.POST["password"], blocked=False)
+    if len(user) == 1:
+        user = user[0]
+        tr_requests = []
+        for tr in user.directed_questions.filter(state=TrackingRequest.REQUEST_CREATED):
+            if tr.is_expired():
+                tr.delete()
+            else:
+                tr.state = TrackingRequest.REQUEST_DELIVERED;
+                tr.save()
+                tr_requests.append(tr)
+
+        tr_responses = user.asked_questions.filter(state=TrackingRequest.REQUEST_GRANTED)
+        for tr in tr_responses:
+            tr.delete()
+
+        return JsonResponse({"requests": [tr.to_dict_request() for tr in tr_requests],
+                             "responses": [tr.to_dict_response() for tr in tr_responses]})
+    else:
+        return JsonResponse({"requests": [], "responses": []})
+
+
+@csrf_exempt
+def ask_position(request):
+    user = User.objects.filter(email=request.POST["username"], password=request.POST["password"], blocked=False)
+    if len(user) == 1:
+        user = user[0]
+        target = User.objects.get(email=request.POST["friend_email"])
+        if user not in target.friends.all():
+            return JsonResponse({"status": "ERROR"})
+        TrackingRequest.objects.create(target=target, source=user)
+        return JsonResponse({"status": "OK"})
+    else:
+        return JsonResponse({"status": "ERROR"})
+
+
+@csrf_exempt
+def show_my_position(request):
+    user = User.objects.filter(email=request.POST["username"], password=request.POST["password"], blocked=False)
+    if len(user) == 1:
+        user = user[0]
+        tr_request = TrackingRequest.objects.get(target=user,
+                                                 source__email=request.POST["friend_email"],
+                                                 state=TrackingRequest.REQUEST_DELIVERED)
+        if request.POST["decision"] == "ACCEPT":
+            tr_request.state = TrackingRequest.REQUEST_GRANTED
+            tr_request.answer_latitude = request.POST["latitude"]
+            tr_request.answer_longitude = request.POST["longitude"]
+            tr_request.save()
+        else:
+            tr_request.delete()
+        return JsonResponse({"status": "OK"})
+    else:
+        return JsonResponse({"status": "ERROR"})
 
 
 @csrf_exempt
@@ -186,6 +245,7 @@ def admin_block_user(request):
         return JsonResponse({"result": "OK"})
     else:
         return JsonResponse({})
+
 
 @csrf_exempt
 def admin_adminify_user(request):

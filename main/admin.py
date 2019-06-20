@@ -42,3 +42,7 @@ class EventAdmin(admin.ModelAdmin):
 @admin.register(Session)
 class SessionAdmin(admin.ModelAdmin):
     pass
+
+@admin.register(TrackingRequest)
+class TrackingRequestAdmin(admin.ModelAdmin):
+    pass

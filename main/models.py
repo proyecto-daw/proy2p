@@ -1,7 +1,12 @@
+from datetime import timedelta, datetime
+
 from django.db import models
 
 
 # Create your models here.
+from django.utils import timezone
+
+
 class Waypoint(models.Model):
     latitude = models.FloatField()
     longitude = models.FloatField()
@@ -81,7 +86,7 @@ class User(models.Model):
     is_admin = models.BooleanField(default=False)
     career = models.CharField(max_length=100)
     courses = models.ManyToManyField(Course, blank=True)
-    friends = models.ManyToManyField('self')
+    friends = models.ManyToManyField('self', blank=True)
     blocked = models.BooleanField(default=False)
 
     def to_dict(self):
@@ -101,6 +106,37 @@ class User(models.Model):
 
     def __str__(self):
         return self.email
+
+
+class TrackingRequest(models.Model):
+    REQUEST_CREATED = 0
+    REQUEST_DELIVERED = 1
+    REQUEST_GRANTED = 2
+    REQUEST_STATE_CHOICES = [
+        (REQUEST_CREATED, "Created"),
+        (REQUEST_DELIVERED, "Delivered"),
+        (REQUEST_GRANTED, "Granted")
+    ]
+
+    target = models.ForeignKey(User, on_delete=models.CASCADE, related_name="directed_questions")
+    source = models.ForeignKey(User, on_delete=models.CASCADE, related_name="asked_questions")
+    state = models.IntegerField(choices=REQUEST_STATE_CHOICES, default=REQUEST_CREATED)
+
+    answer_latitude = models.FloatField(null=True, blank=True)
+    answer_longitude = models.FloatField(null=True, blank=True)
+
+    date_creation = models.DateTimeField(auto_now_add=True)
+    date_last_update = models.DateTimeField(auto_now=True)
+
+    def is_expired(self):
+        return (self.date_last_update + timedelta(minutes=5)) < timezone.now()
+
+    def to_dict_request(self):
+        return {"CREADOR_EMAIL": self.source.email, "TIMESTAMP": self.date_creation}
+
+    def to_dict_response(self):
+        return {"OBJETIVO_EMAIL": self.target.email, "ESTADO": "OK", "TIMESTAMP": self.date_creation,
+                "LATITUD": self.answer_latitude, "LONGITUD": self.answer_longitude}
 
 
 class Event(models.Model):
