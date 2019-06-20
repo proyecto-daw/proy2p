@@ -23,7 +23,7 @@ def login(request):
 
 @csrf_exempt
 def waypoints(request):
-    return JsonResponse({"waypoints": {w.id: [w.latitude, w.longitude, w.name] for w in Waypoint.objects.all().order_by("id")}})
+    return JsonResponse({"waypoints": {w.id: w.to_dict() for w in Waypoint.objects.all().order_by("id")}})
 
 
 @csrf_exempt
