@@ -3,9 +3,15 @@ from .models import *
 
 
 # Register your models here.
+class RouteInline(admin.TabularInline):
+    model = Route
+    fk_name = "target"
+    extra = 1
+
+
 @admin.register(Waypoint)
 class WaypointAdmin(admin.ModelAdmin):
-    pass
+    inlines = (RouteInline,)
 
 
 @admin.register(Area)
@@ -31,6 +37,7 @@ class CourseAdmin(admin.ModelAdmin):
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
     pass
+
 
 @admin.register(Session)
 class SessionAdmin(admin.ModelAdmin):

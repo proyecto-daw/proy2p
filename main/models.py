@@ -7,12 +7,20 @@ class Waypoint(models.Model):
     longitude = models.FloatField()
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
+    neighbor_waypoints = models.ManyToManyField("self", through="Route", symmetrical=False)
 
     def __str__(self):
         return f"WP {self.name}"
 
     def to_dict(self):
-        return [self.latitude, self.longitude, self.name]
+        return [self.latitude, self.longitude, self.name,
+                [[r.target.id, r.distance] for r in Route.objects.filter(source=self)]]
+
+
+class Route(models.Model):
+    source = models.ForeignKey(Waypoint, related_name="source", on_delete=models.CASCADE)
+    target = models.ForeignKey(Waypoint, related_name="target", on_delete=models.CASCADE)
+    distance = models.FloatField()
 
 
 class Area(models.Model):
