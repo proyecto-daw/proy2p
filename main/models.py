@@ -2,7 +2,6 @@ from datetime import timedelta, datetime
 
 from django.db import models
 
-
 # Create your models here.
 from django.utils import timezone
 
@@ -98,7 +97,7 @@ class User(models.Model):
         return response_dict
 
     def to_friend_dict(self):
-        return {"NAMES": self.name, "LASTNAMES": "", "CAREER": self.career}
+        return {"NAMES": self.name, "LASTNAMES": "", "CAREER": self.career, "EMAIL": self.email}
 
     def to_admin_dict(self):
         return {"NAMES": self.name, "LASTNAMES": "", "USERNAME": self.username, "EMAIL": self.email,
