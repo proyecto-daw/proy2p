@@ -121,7 +121,6 @@ def search_people(request):
         term = request.POST["query"]
         candidates = User.objects.exclude(friends__in=[user]).filter(blocked=False).filter(
             Q(name__icontains=term) | Q(email__icontains=term))
-        print(candidates)
         return JsonResponse({"found": [f.to_search_dict() for f in candidates]})
     else:
         return JsonResponse({"found": []})

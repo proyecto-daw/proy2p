@@ -70,7 +70,7 @@ class Session(models.Model):
                 "PARALELO": self.course.number,
                 "AULA": self.classroom,
                 "BLOQUE": self.closest_waypoint.id,
-                "HORA": f"{self.start_time.hour}:{self.start_time.minute}"
+                "HORA": f"{self.start_time.hour}:{self.start_time.minute:02}"
                 }
 
     def __str__(self):
