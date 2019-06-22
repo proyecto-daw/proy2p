@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from django.db.models import ProtectedError
+from django.db.models import ProtectedError, Q
 from django.http import JsonResponse
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
@@ -111,6 +111,43 @@ def friends_groups(request):
                              "groups": []})
     else:
         return JsonResponse({"friends": [], "groups": []})
+
+
+@csrf_exempt
+def search_people(request):
+    user = User.objects.filter(email=request.POST["username"], password=request.POST["password"], blocked=False)
+    if len(user) == 1:
+        user = user[0]
+        term = request.POST["query"]
+        candidates = User.objects.exclude(friends__in=user).filter(blocked=False).filter(
+            Q(name__icontains=term) | Q(email__icontains=term))
+        return JsonResponse({"found": [f.to_search_dict() for f in candidates]})
+    else:
+        return JsonResponse({"found": []})
+
+
+@csrf_exempt
+def add_friend(request):
+    user = User.objects.filter(email=request.POST["username"], password=request.POST["password"], blocked=False)
+    if len(user) == 1:
+        user = user[0]
+        user.friends.add(User.objects.get(email=request.POST["friend"]))
+        user.save()
+        return JsonResponse({"status": "OK"})
+    else:
+        return JsonResponse({"status": "ERROR"})
+
+
+@csrf_exempt
+def remove_friend(request):
+    user = User.objects.filter(email=request.POST["username"], password=request.POST["password"], blocked=False)
+    if len(user) == 1:
+        user = user[0]
+        user.friends.remove(User.objects.get(email=request.POST["no_longer_friend"]))
+        user.save()
+        return JsonResponse({"status": "OK"})
+    else:
+        return JsonResponse({"status": "ERROR"})
 
 
 @csrf_exempt

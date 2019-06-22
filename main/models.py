@@ -104,6 +104,9 @@ class User(models.Model):
         return {"NAMES": self.name, "LASTNAMES": "", "USERNAME": self.username, "EMAIL": self.email,
                 "CAREER": self.career, "BLOCKED": self.blocked, "ADMIN": self.is_admin, "ID": self.id}
 
+    def to_search_dict(self):
+        return {"NAMES": self.name, "LASTNAMES": "", "ID": self.id}
+
     def __str__(self):
         return self.email
 
