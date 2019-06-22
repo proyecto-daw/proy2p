@@ -1,8 +1,7 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from django.db.models import ProtectedError
-from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render
+from django.http import JsonResponse
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 
@@ -35,7 +34,8 @@ def areas(request):
 @csrf_exempt
 def events(request):
     return JsonResponse({"events": {e.id: e.to_dict()
-                                    for e in Event.objects.filter(start_datetime__gt=timezone.now()).order_by("id")}
+                                    for e in
+                                    Event.objects.filter(start_datetime__gt=timezone.now()).order_by("start_datetime")}
                          })
 
 
@@ -63,6 +63,46 @@ def my_classes(request):
 
 
 @csrf_exempt
+def my_events(request):
+    user = User.objects.filter(email=request.POST["username"], password=request.POST["password"], blocked=False)
+    if len(user) == 1:
+        user = user[0]
+        return JsonResponse(
+            {"events": {e.id: e.to_dict()
+                        for e in user.saved_events.all().order_by("start_datetime")
+                        if e.start_datetime > timezone.now()}
+             })
+    else:
+        return JsonResponse({"events": []})
+
+
+@csrf_exempt
+def add_my_event(request):
+    user = User.objects.filter(email=request.POST["username"], password=request.POST["password"], blocked=False)
+    if len(user) == 1:
+        user = user[0]
+        ev = Event.objects.get(id=request.POST["event"])
+        user.saved_events.add(ev)
+        user.save()
+        return JsonResponse({"status": "OK"})
+    else:
+        return JsonResponse({"status": "ERROR"})
+
+
+@csrf_exempt
+def remove_my_event(request):
+    user = User.objects.filter(email=request.POST["username"], password=request.POST["password"], blocked=False)
+    if len(user) == 1:
+        user = user[0]
+        ev = Event.objects.get(id=request.POST["event"])
+        user.saved_events.remove(ev)
+        user.save()
+        return JsonResponse({"status": "OK"})
+    else:
+        return JsonResponse({"status": "ERROR"})
+
+
+@csrf_exempt
 def friends_groups(request):
     user = User.objects.filter(email=request.POST["username"], password=request.POST["password"], blocked=False)
     if len(user) == 1:
@@ -83,7 +123,7 @@ def poll(request):
             if tr.is_expired():
                 tr.delete()
             else:
-                tr.state = TrackingRequest.REQUEST_DELIVERED;
+                tr.state = TrackingRequest.REQUEST_DELIVERED
                 tr.save()
                 tr_requests.append(tr)
 

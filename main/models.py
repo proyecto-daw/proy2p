@@ -87,6 +87,7 @@ class User(models.Model):
     courses = models.ManyToManyField(Course, blank=True)
     friends = models.ManyToManyField('self', blank=True)
     blocked = models.BooleanField(default=False)
+    saved_events = models.ManyToManyField('Event', blank=True)
 
     def to_dict(self):
         response_dict = {"NAMES": self.name, "LASTNAMES": "", "USERNAME": self.username, "EMAIL": self.email,
