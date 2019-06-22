@@ -1,11 +1,12 @@
-from datetime import datetime
+from datetime import datetime as ddt
 
 from django.db.models import ProtectedError, Q
 from django.http import JsonResponse
+from django.shortcuts import redirect
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 
-from .models import User, Waypoint, Area, Event, TrackingRequest
+from .models import User, Waypoint, Area, Event, TrackingRequest, Session, Subject, Course
 from django.views.decorators.csrf import csrf_exempt
 import json
 
@@ -55,7 +56,7 @@ def my_classes(request):
     user = User.objects.filter(email=request.POST["username"], password=request.POST["password"], blocked=False)
     if len(user) == 1:
         user = user[0]
-        today_index = datetime.today().isoweekday()  # Monday is 1 and Sunday is 7
+        today_index = ddt.today().isoweekday()  # Monday is 1 and Sunday is 7
         return JsonResponse(
             {"classes": [s.to_dict() for c in user.courses.all() for s in c.session_set.all() if s.day == today_index]})
     else:
@@ -148,6 +149,73 @@ def remove_friend(request):
         return JsonResponse({"status": "OK"})
     else:
         return JsonResponse({"status": "ERROR"})
+
+
+from icalendar import Calendar, Event
+import datetime
+import re
+
+
+def removePracticals(classes):
+    nonDupes = []
+    for x in classes:
+        hasDupe = False
+        for y in nonDupes:
+            if x.course.subject.name == y.course.subject.name and x.day == y.day:
+                hasDupe = True
+                x.delete()
+        if not hasDupe:
+            nonDupes.append(x)
+    return nonDupes
+
+
+def extractCourseParallel(text):
+    regex = re.compile(r"^(\w+)\s+-\s+(.+)Paralelo N. (\d+) Aula: (.+)$")
+    groups = regex.search(text)
+    return groups[2].strip(), groups[3].strip()
+
+def magicFindClosestWp(classroom):
+    return 1 # HACK: do something to recognize more classrooms???
+
+def findOrCreateSession(component):
+    days = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"]
+    subject, _ = Subject.objects.get_or_create(name=extractCourseParallel(component.get("description"))[0])
+    parallel, _ = Course.objects.get_or_create(subject_id=subject.id,
+                                            number=extractCourseParallel(component.get("description"))[1])
+    dtstart = component.get('dtstart').dt - datetime.timedelta(hours=5)
+    session, _ = Session.objects.get_or_create(course=parallel, day=days.index(component.get('rrule')['BYDAY'][0]),
+                                               start_time=datetime.time(hour=dtstart.hour, minute=dtstart.minute),
+                                               classroom=component.get('location'),
+                                               closest_waypoint_id=magicFindClosestWp(component.get('location')))
+
+    return session
+
+@csrf_exempt
+def upload_calendar(request):
+    classes = []
+
+    user = User.objects.filter(email=request.POST["username"], password=request.POST["password"], blocked=False)
+    if len(user) == 1:
+        user = user[0]
+        f = request.FILES["file"]
+        f.seek(0)
+
+        fcal = Calendar.from_ical(f.read())
+        for component in fcal.walk():
+            if component.name == "VEVENT":
+                x = findOrCreateSession(component)
+                if x not in classes:
+                    classes.append(x)
+
+        classes = removePracticals(classes)
+
+        for x in classes:
+            x.save()
+            if x.course not in user.courses.all():
+                user.courses.add(x.course)
+                user.save()
+
+    return redirect(request.POST["backurl"])
 
 
 @csrf_exempt

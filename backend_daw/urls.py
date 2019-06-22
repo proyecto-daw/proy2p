@@ -32,6 +32,7 @@ urlpatterns = [
     path('search_people', views.search_people, name="search_people"),
     path('add_friend', views.add_friend, name="add_friend"),
     path('remove_friend', views.remove_friend, name="remove_friend"),
+    path('upload_calendar', views.upload_calendar, name="upload_calendar"),
     path('poll', views.poll, name="poll"),
     path('ask_position', views.ask_position, name="ask_position"),
     path('publish_my_position', views.show_my_position, name="show_my_position"),
