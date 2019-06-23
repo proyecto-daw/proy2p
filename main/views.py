@@ -151,7 +151,7 @@ def remove_friend(request):
         return JsonResponse({"status": "ERROR"})
 
 
-from icalendar import Calendar, Event
+from icalendar import Calendar
 import datetime
 import re
 
