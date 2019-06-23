@@ -6,7 +6,7 @@ from django.shortcuts import redirect
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 
-from .models import User, Waypoint, Area, Event, TrackingRequest, Session, Subject, Course
+from .models import User, Waypoint, Area, Event, TrackingRequest, Session, Subject, Course, Route
 from django.views.decorators.csrf import csrf_exempt
 import json
 
@@ -174,14 +174,16 @@ def extractCourseParallel(text):
     groups = regex.search(text)
     return groups[2].strip(), groups[3].strip()
 
+
 def magicFindClosestWp(classroom):
-    return 1 # HACK: do something to recognize more classrooms???
+    return 1  # HACK: do something to recognize more classrooms???
+
 
 def findOrCreateSession(component):
     days = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"]
     subject, _ = Subject.objects.get_or_create(name=extractCourseParallel(component.get("description"))[0])
     parallel, _ = Course.objects.get_or_create(subject_id=subject.id,
-                                            number=extractCourseParallel(component.get("description"))[1])
+                                               number=extractCourseParallel(component.get("description"))[1])
     dtstart = component.get('dtstart').dt - datetime.timedelta(hours=5)
     session, _ = Session.objects.get_or_create(course=parallel, day=days.index(component.get('rrule')['BYDAY'][0]),
                                                start_time=datetime.time(hour=dtstart.hour, minute=dtstart.minute),
@@ -189,6 +191,7 @@ def findOrCreateSession(component):
                                                closest_waypoint_id=magicFindClosestWp(component.get('location')))
 
     return session
+
 
 @csrf_exempt
 def upload_calendar(request):
@@ -402,3 +405,24 @@ def admin_adminify_user(request):
         return JsonResponse({"result": "OK"})
     else:
         return JsonResponse({})
+
+
+@csrf_exempt
+def admin_add_route(request):
+    user = User.objects.filter(email=request.POST["username"], password=request.POST["password"], is_admin=True)
+    if len(user) == 1:
+        source = Waypoint.objects.get(id=request.POST["source"])
+        target = Waypoint.objects.get(id=request.POST["target"])
+        x = Route.objects.filter(source=source, target=target)
+        if x.count():  # Route already exists
+            x[0].distance = request.POST["distance"]
+            x.save()
+            y = Route.objects.filter(source=target, target=source)[0]
+            y.distance = request.POST["distance"]
+            y.save()
+        else: # Route does not exist, create it
+            Route.objects.create(source=source, target=target, distance=request.POST["distance"])
+            Route.objects.create(source=target, target=source, distance=request.POST["distance"])
+        return JsonResponse({"result": "OK"})
+    else:
+        return JsonResponse({"result": "ERROR"})

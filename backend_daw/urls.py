@@ -45,4 +45,5 @@ urlpatterns = [
     path('api_admin/view_users', views.admin_view_users, name="admin_view_users"),
     path('api_admin/block_user', views.admin_block_user, name="admin_block_user"),
     path('api_admin/adminify_user', views.admin_adminify_user, name="admin_adminify_user"),
+    path('api_admin/add_new_route', views.admin_add_route, name="admin_add_route"),
 ]
