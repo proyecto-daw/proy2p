@@ -181,8 +181,20 @@ def magicFindClosestWp(classroom: str):
         return 2
     if classroom.startswith("15A-"):
         return 1
+    if classroom.startswith("16A-"):
+        return 20
+    if classroom.startswith("27-"):
+        return 21
+    if classroom.startswith("47"):
+        return 22
+    if classroom.startswith("BA"):
+        return 13
+    if classroom.startswith("31B"):
+        return 12
     if classroom in ("COM1", "COM2"):
         return 11
+    if classroom in ("ANDRÓMEDA", "ORIÓN", "CENTAURO", "PHOENIX"):
+        return 19
     return 1
 
 
@@ -427,7 +439,7 @@ def admin_add_route(request):
             y = Route.objects.filter(source=target, target=source)[0]
             y.distance = request.POST["distance"]
             y.save()
-        else: # Route does not exist, create it
+        else:  # Route does not exist, create it
             Route.objects.create(source=source, target=target, distance=request.POST["distance"])
             Route.objects.create(source=target, target=source, distance=request.POST["distance"])
         return JsonResponse({"result": "OK"})
