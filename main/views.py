@@ -175,8 +175,15 @@ def extractCourseParallel(text):
     return groups[2].strip(), groups[3].strip()
 
 
-def magicFindClosestWp(classroom):
-    return 1  # HACK: do something to recognize more classrooms???
+def magicFindClosestWp(classroom: str):
+    # HACK: do something to recognize more classrooms???
+    if classroom.startswith("A-"):
+        return 2
+    if classroom.startswith("15A-"):
+        return 1
+    if classroom in ("COM1", "COM2"):
+        return 11
+    return 1
 
 
 def findOrCreateSession(component):
