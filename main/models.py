@@ -124,6 +124,7 @@ class TrackingRequest(models.Model):
     target = models.ForeignKey(User, on_delete=models.CASCADE, related_name="directed_questions")
     source = models.ForeignKey(User, on_delete=models.CASCADE, related_name="asked_questions")
     state = models.IntegerField(choices=REQUEST_STATE_CHOICES, default=REQUEST_CREATED)
+    message = models.TextField(null=True, blank=True)
 
     answer_latitude = models.FloatField(null=True, blank=True)
     answer_longitude = models.FloatField(null=True, blank=True)
@@ -135,7 +136,7 @@ class TrackingRequest(models.Model):
         return (self.date_last_update + timedelta(minutes=5)) < timezone.now()
 
     def to_dict_request(self):
-        return {"CREADOR_EMAIL": self.source.email, "TIMESTAMP": self.date_creation}
+        return {"CREADOR_EMAIL": self.source.email, "MENSAJE": self.message, "TIMESTAMP": self.date_creation}
 
     def to_dict_response(self):
         return {"OBJETIVO_EMAIL": self.target.email, "ESTADO": "OK", "TIMESTAMP": self.date_creation,

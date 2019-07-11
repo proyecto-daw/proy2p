@@ -272,7 +272,7 @@ def ask_position(request):
         target = User.objects.get(email=request.POST["friend_email"])
         if user not in target.friends.all():
             return JsonResponse({"status": "ERROR"})
-        TrackingRequest.objects.create(target=target, source=user)
+        TrackingRequest.objects.create(target=target, source=user, message=request.POST.get("message",""))
         return JsonResponse({"status": "OK"})
     else:
         return JsonResponse({"status": "ERROR"})
