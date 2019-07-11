@@ -272,7 +272,7 @@ def ask_position(request):
         target = User.objects.get(email=request.POST["friend_email"])
         if user not in target.friends.all():
             return JsonResponse({"status": "ERROR"})
-        TrackingRequest.objects.create(target=target, source=user, message=request.POST.get("message",""))
+        TrackingRequest.objects.create(target=target, source=user, message=request.POST.get("message", ""))
         return JsonResponse({"status": "OK"})
     else:
         return JsonResponse({"status": "ERROR"})
@@ -283,9 +283,9 @@ def show_my_position(request):
     user = User.objects.filter(email=request.POST["username"], password=request.POST["password"], blocked=False)
     if len(user) == 1:
         user = user[0]
-        tr_request = TrackingRequest.objects.get(target=user,
-                                                 source__email=request.POST["friend_email"],
-                                                 state=TrackingRequest.REQUEST_DELIVERED)
+        tr_request = TrackingRequest.objects.filter(target=user,
+                                                    source__email=request.POST["friend_email"],
+                                                    state=TrackingRequest.REQUEST_DELIVERED)[0]
         if request.POST["decision"] == "ACCEPT":
             tr_request.state = TrackingRequest.REQUEST_GRANTED
             tr_request.answer_latitude = request.POST["latitude"]
