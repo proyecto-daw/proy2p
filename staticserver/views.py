@@ -1,5 +1,6 @@
-from django.shortcuts import render
-
+from django.shortcuts import render,HttpResponseRedirect,render_to_response
+from django.core.mail import EmailMessage,send_mail
+from staticserver.models import *
 
 # Create your views here.
 def home(request):
@@ -21,10 +22,8 @@ def news(request):
 def quehacemos(request):
     return render(request, "quehacemos.html")
 
-
-def contactus(request):
+def contactus3(request):
     return render(request, "contactus.html")
-
 
 def admin(request):
     return render(request, "admin.html")
@@ -64,3 +63,25 @@ def register(request):
 
 def user_profile(request):
     return render(request, "user-profile.html")
+
+def contactus(request):
+    if request.method == 'POST':
+        formulario = FormularioContactanos(request.POST)
+        if formulario.is_valid():
+            asunto = "Alguien quiere contactartese contigo"
+            mensaje = "Una persona te a escrito!!"
+            '''
+            mail = EmailMessage(asunto, mensaje,to=['nexusmap2019@gmail.com'])
+            mail.send()
+            '''
+            send_mail(
+                asunto,
+                mensaje,
+                'nexusmap2019@gmail.com',
+                ['nexusmap2019@gmail.com'],
+                fail_silently=False,
+            )
+            return HttpResponseRedirect('/')
+    else:
+        formulario = FormularioContactanos()
+    return render(request, "contactus.html",{'form':formulario})

@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+import smtplib
 
 CORS_ORIGIN_ALLOW_ALL = True
 
@@ -133,3 +134,10 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),
 )
+
+# Extra places for send froms
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'nexusmap2019@gmail.com'
+EMAIL_HOST_PASSWORD = 'rubotsdmttmc'
+EMAIL_PORT = 587
